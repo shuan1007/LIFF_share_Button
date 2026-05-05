@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flex 作品分享器</title>
+  <!-- 引入官方 SDK -->
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
+    .card { background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 80%; max-width: 400px; }
+    button { background-color: #06C755; color: white; border: none; padding: 12px 24px; border-radius: 50px; font-size: 1.1rem; cursor: pointer; width: 100%; transition: 0.3s; }
+    button:disabled { background-color: #ccc; }
+    .status { margin-top: 15px; font-size: 0.9rem; color: #666; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>我的教學作品</h2>
+  <button id="btn" disabled>載入中...</button>
+  <div id="status" class="status">正在初始化 LIFF...</div>
+</div>
+
+<script>
+  // 1. 設定區 
+  const LIFF_ID = '2009826317-4ehd43k1'; 
+  const FLEX_JSON = {
+    "type": "bubble",
+    "footer": {
+      "type": "box",
+      "layout": "vertical",
+      "contents": [
+        {
+          "type": "button",
+          "style": "primary",
+          "color": "#3a6ea5",
+          "action": {
+            "type": "uri",
+            "label": "點我查看",
+            "uri": "https://liff.line.me/" + LIFF_ID
+          }
+        }
+      ]
+    }
+  };
+
+  const btn = document.getElementById('btn');
+  const statusTxt = document.getElementById('status');
+
+  // 2. 初始化 LIFF
+  async function init() {
+    try {
+      await liff.init({ liffId: LIFF_ID });
+      if (!liff.isLoggedIn()) {
+        statusTxt.innerText = "正在導向登入頁面...";
+        liff.login();
+      } else {
+        btn.disabled = false;
+        btn.innerText = "分享給好友";
+        statusTxt.innerText = "準備就緒！";
+      }
+    } catch (err) {
+      statusTxt.innerText = "錯誤: " + err.message;
+    }
+  }
+
+  // 3. 執行分享
+  btn.onclick = async () => {
+    if (liff.isApiAvailable('shareTargetPicker')) {
+      try {
+        const res = await liff.shareTargetPicker([
+          {
+            type: "flex",
+            altText: "快來看看我的作品！",
+            contents: FLEX_JSON
+          }
+        ]);
+        if (res) statusTxt.innerText = "發送成功！";
+      } catch (e) {
+        statusTxt.innerText = "發送取消或失敗";
+      }
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
