@@ -1,1 +1,1 @@
-# LIFF_shareTargetPicker_Button
+# shareTargetPicker demo
